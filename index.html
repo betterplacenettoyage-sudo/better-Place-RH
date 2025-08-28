@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Better Place – Espace Questionnaires RH</title>
+  <meta name="description" content="Questionnaires anonymes mensuels Better Place – employés & coliving" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { --brand: #2563eb; }
+    html { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+    .focus-ring { outline: 3px solid var(--brand); outline-offset: 2px; }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900">
+  <!-- Lien d'évitement -->
+  <a href="#main" class="sr-only focus:not-sr-only focus-ring bg-white px-3 py-2 rounded-b-lg">Aller au contenu</a>
+
+  <!-- Header -->
+  <header class="bg-white border-b sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="./assets/logo-betterplace.svg" alt="Logo Better Place" class="h-8 w-8" onerror="this.style.display='none'">
+        <h1 class="text-lg sm:text-xl font-semibold">Better Place — Espace Questionnaires RH</h1>
+      </div>
+      <div class="flex items-center gap-2" aria-label="Réglages d'accessibilité">
+        <button id="fontDec" class="px-2 py-1 text-sm rounded border bg-white hover:bg-gray-50" title="Réduire la taille du texte" aria-label="Réduire la taille du texte">A−</button>
+        <button id="fontInc" class="px-2 py-1 text-sm rounded border bg-white hover:bg-gray-50" title="Augmenter la taille du texte" aria-label="Augmenter la taille du texte">A+</button>
+        <button id="contrastToggle" class="px-2 py-1 text-sm rounded border bg-white hover:bg-gray-50" title="Contraste élevé" aria-pressed="false">Contraste</button>
+        <button id="ttsToggle" class="px-2 py-1 text-sm rounded border bg-white hover:bg-gray-50" title="Lecture audio" aria-pressed="false">Audio</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main id="main" class="max-w-5xl mx-auto px-4 py-8">
+    <section class="mb-8">
+      <div class="bg-white rounded-2xl shadow p-6">
+        <h2 class="text-xl font-semibold mb-2">Bienvenue 👋</h2>
+        <p class="text-gray-700">Cet espace rassemble les <strong>questionnaires anonymes</strong> mensuels pour nos sites (écoles, établissements, résidences). Sélectionnez votre site ci-dessous :
+        </p>
+        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+          <label class="block">
+            <span class="text-sm font-medium">Sélectionnez votre site</span>
+            <select id="siteSelect" class="mt-1 w-full rounded-lg border px-3 py-2" aria-describedby="siteHelp">
+              <option value="" selected>— Choisir —</option>
+            </select>
+            <p id="siteHelp" class="mt-1 text-sm text-gray-500">Si votre site n'apparaît pas, contactez votre référent.</p>
+          </label>
+
+          <label class="block">
+            <span class="text-sm font-medium">Type de questionnaire</span>
+            <select id="typeSelect" class="mt-1 w-full rounded-lg border px-3 py-2">
+              <option value="employees" selected>Employés / Personnel</option>
+              <option value="coliving">Coliving / Résidents</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="mt-6 flex flex-wrap items-center gap-3">
+          <button id="openFormBtn" class="inline-flex items-center gap-2 rounded-xl bg-[var(--brand)] text-white px-4 py-2 font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5v14m-7-7h14"/></svg>
+            Ouvrir le questionnaire
+          </button>
+          <span id="statusMsg" class="text-sm text-gray-600" role="status" aria-live="polite"></span>
+        </div>
+
+        <p class="mt-4 text-sm text-gray-600">⏱️ <span id="monthLabel"></span> — Une seule réponse par appareil et par site chaque mois.</p>
+      </div>
+    </section>
+
+    <footer class="text-sm text-gray-500 py-8">
+      <p>© <span id="year"></span> Better Place. Tous droits réservés.</p>
+    </footer>
+  </main>
+
+  <script>
+    const FORMS = {
+      "École Alpha": { employees: "https://example.com/form-employes-alpha", coliving: "https://example.com/form-coliving-alpha" },
+      "École Beta": { employees: "https://example.com/form-employes-beta", coliving: "https://example.com/form-coliving-beta" }
+    };
+
+    const $ = (s, r=document) => r.querySelector(s);
+    const siteSelect = $('#siteSelect');
+
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth()+1).padStart(2, '0');
+    const yyyymm = `${yyyy}${mm}`;
+    const monthLabel = now.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    document.getElementById('monthLabel').textContent = monthLabel;
+    document.getElementById('year').textContent = yyyy;
+
+    Object.keys(FORMS).sort((a,b)=>a.localeCompare(b,'fr')).forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name; opt.textContent = name; siteSelect.appendChild(opt);
+    });
+  </script>
+</body>
+</html>
